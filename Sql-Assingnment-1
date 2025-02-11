@@ -128,7 +128,8 @@ GROUP BY
     PRODUCT_ID;
     
     
-    
+
+
     
     -- 7 Newly Created Sales Orders and Payment Methods
 -- Business Problem:
@@ -153,16 +154,16 @@ USING (order_id) order by ORDER_DATE DESC ;
 
 
 
-8 Payment Captured but Not Shipped
-Business Problem:
-Finance teams want to ensure revenue is recognized properly. If payment is captured but no shipment has occurred, it warrants further review.
+-- 8 Payment Captured but Not Shipped
+-- Business Problem:
+-- Finance teams want to ensure revenue is recognized properly. If payment is captured but no shipment has occurred, it warrants further review.
 
-Fields to Retrieve:
+-- Fields to Retrieve:
 
-ORDER_ID
-ORDER_STATUS
-PAYMENT_STATUS
-SHIPMENT_STATUS
+-- ORDER_ID
+-- ORDER_STATUS
+-- PAYMENT_STATUS
+-- SHIPMENT_STATUS
 
 
 SELECT 
@@ -194,6 +195,91 @@ AND
 
 
 
+
+-- 9 Orders Completed Hourly
+-- Business Problem:
+-- Operations teams may want to see how orders complete across the day to schedule staffing.
+
+-- Fields to Retrieve:
+
+-- TOTAL ORDERS
+-- HOUR
+
+
+SELECT 
+	count(*) as TOTAL_ORDERS, 
+	HOUR(order_date) as HOUR  
+FROM
+	order_header 
+WHERE 
+	STATUS_ID='ORDER_COMPLETED' 
+GROUP BY 
+	Hour(order_date) ;
+
+
+
+-- 10 BOPIS Orders Revenue (Last Year)
+-- Business Problem:
+-- BOPIS (Buy Online, Pickup In Store) is a key retail strategy. Finance wants to know the revenue from BOPIS orders for the previous year.
+
+-- Fields to Retrieve:
+
+-- TOTAL ORDERS
+-- TOTAL REVENUE
+
+
+
+SELECT  
+	COUNT(oh.order_id) as TOTAL_ORDERS, 
+        SUM(oh.grand_Total)  
+FROM
+	order_header oh  
+JOIN
+	order_shipment os 
+USING
+	(order_id) 
+JOIN
+	shipment s 
+ON 
+	os.SHIPMENT_ID=s.SHIPMENT_ID  
+WHERE
+	oh.SALES_CHANNEL_ENUM_ID='WEB_SALES_CHANNEL' 
+AND 
+	s.SHIPMENT_METHOD_TYPE_ID='STOREPICKUP' 
+AND 
+	oh.order_date >='2024-01-01' 
+AND 
+	oh.order_date <'2025-01-01';                 
+
+
+
+-- 11 Canceled Orders (Last Month)
+-- Business Problem:
+-- The merchandising team needs to know how many orders were canceled in the previous month and their reasons.
+
+-- Fields to Retrieve:
+
+-- TOTAL ORDERS
+-- CANCELATION REASON    
+
+SELECT  
+	COUNT(oh.ORDER_ID) AS TOTAL_ORDERS, 
+    os.CHANGE_REASON AS CANCELATION_REASON
+FROM
+	order_header oh 
+JOIN
+	Order_Status os ON oh.order_id= os.order_id 
+WHERE
+	os.status_id='ORDER_CANCELLED'  
+AND	
+	oh.order_date >'2024-12-01' 
+AND	 
+	oh.order_date <'2024-12-31'     
+    
+GROUP BY
+	os.CHANGE_REASON;
+    
+    
 
 
 
