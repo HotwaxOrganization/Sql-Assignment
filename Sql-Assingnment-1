@@ -37,8 +37,8 @@ WHERE
     AND  p.CREATED_DATE >= '2023-06-01' 
     AND  p.CREATED_DATE <'2023-07-01';
 
-
-
+Query cost=14990.80
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- 2 List All Active Physical Products
 -- Business Problem:
@@ -50,7 +50,6 @@ WHERE
 -- PRODUCT_TYPE_ID
 -- INTERNAL_NAME
 
-select * from product_;
 
 SELECT 
     p.PRODUCT_ID,
@@ -60,8 +59,10 @@ FROM product p
 JOIN product_type  
 USING(product_type_id) 
 WHERE IS_PHYSICAL='Y'  ;
-     
 
+Query cost=115288.48
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- 3 Products Missing NetSuite ID
 -- Business Problem:
@@ -93,12 +94,14 @@ WHERE
 	gd.GOOD_IDENTIFICATION_TYPE_ID='ERP_ID'
 AND
 	ID_VALUE is null 
-OR  ID_VALUE ='';
+OR      ID_VALUE ='';
 	
 	
 	
+Query cost =2.36	
 	
-	
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	
 	
@@ -126,12 +129,16 @@ FROM
     good_identification 
 GROUP BY
     PRODUCT_ID;
-    
+
+
+Query cost = 282640.22
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
     
 
 
     
-    -- 7 Newly Created Sales Orders and Payment Methods
+-- 7 Newly Created Sales Orders and Payment Methods
 -- Business Problem:
 -- Finance teams need to see new orders and their payment methods for reconciliation and fraud checks.
 
@@ -152,7 +159,12 @@ FROM order_header
 JOIN Order_Payment_Preference 
 USING (order_id) order by ORDER_DATE DESC ;
 
+Query cost =52082.40 
 
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- 8 Payment Captured but Not Shipped
 -- Business Problem:
@@ -192,8 +204,10 @@ AND
 
 
 
+Query Cost=2.24
 
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 -- 9 Orders Completed Hourly
@@ -215,6 +229,13 @@ WHERE
 	STATUS_ID='ORDER_COMPLETED' 
 GROUP BY 
 	Hour(order_date) ;
+
+
+Query Cost=5382.90
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -252,6 +273,10 @@ AND
 	oh.order_date <'2025-01-01';                 
 
 
+Query Cost=10737.20
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 -- 11 Canceled Orders (Last Month)
 -- Business Problem:
@@ -264,7 +289,7 @@ AND
 
 SELECT  
 	COUNT(oh.ORDER_ID) AS TOTAL_ORDERS, 
-    os.CHANGE_REASON AS CANCELATION_REASON
+        os.CHANGE_REASON AS CANCELATION_REASON
 FROM
 	order_header oh 
 JOIN
@@ -281,9 +306,10 @@ GROUP BY
     
     
 
+Query Cost=20086.03
 
 
 
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
