@@ -17,7 +17,6 @@
 -- PRODUCT_STORE_ID
 
 
-
 SELECT
     oi.order_id,
     oi.order_item_seq_id,
@@ -30,20 +29,19 @@ SELECT
 	os.status_Datetime AS status_date_time,
     oh.order_type_id,
     oh.product_store_id
-ROM
+FROM
     order_item oi
 JOIN
-    order_header oh ON oi.order_id = oh.order_id
+    order_header oh ON oi.order_id = oh.order_id AND 	oh.order_type_id='SALES_ORDER' and oh.status_id = 'ORDER_COMPLETED'
 JOIN
-    product p ON oi.product_id = p.product_id
-LEFT JOIN
-    order_status os ON oi.order_id = os.order_id AND oi.order_item_seq_id = os.order_Item_Seq_Id
-WHERE 
-	oh.order_type_id='SALES_ORDER'
-AND
-	os.status_id = 'ORDER_COMPLETED';
+    product p ON oi.product_id = p.product_id AND p.PRODUCT_TYPE_ID not in('DIGITAL_GOOD','DONATION','INSTALLATION_SERVICE','SERVICE')
+ JOIN
+    order_status os ON oi.order_id = os.order_id AND oi.order_item_seq_id = os.order_Item_Seq_Id;
 	
+ 
+Query Cost=56922.38
 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
