@@ -87,6 +87,11 @@ WHERE RH.STATUS_ID = 'RETURN_COMPLETED';
 
 
 
+Query Cost= 4651.57
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+
 
 -- 3 Single-Return Orders (Last Month)
 -- Business Problem:
@@ -119,6 +124,10 @@ HAVING
     COUNT(RI.return_Item_Seq_Id) = 1;
 
 
+Query cost=1132.15
+
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 4 Returns and Appeasements
@@ -146,8 +155,11 @@ WHERE
 
 
 
+Query cost=243.30
 
 
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 5 Detailed Return Information
@@ -167,7 +179,7 @@ WHERE
 -- PRODUCT_STORE_ID
 
 select
-	rh.RETURN_ID,
+    rh.RETURN_ID,
     rh.ENTRY_DATE,
     ra.RETURN_ADJUSTMENT_TYPE_ID,
     ra.AMOUNT,
@@ -187,6 +199,12 @@ left JOIN
 
 
 
+Query cost=5829.33
+
+
+
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 
@@ -220,7 +238,10 @@ HAVING
     COUNT(DISTINCT ri.RETURN_ID) > 1;
 
 
+Query cost=6009.85
 
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 7 Store with Most One-Day Shipped Orders (Last Month)
@@ -248,8 +269,7 @@ JOIN
 JOIN
     Shipment S ON OH.ORDER_ID = S.primary_Order_Id
 WHERE
- --    OH.order_date >= '2025-01-01' AND OH.order_date < '2025-02-01'
-	OH.order_date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') 
+ 	OH.order_date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') 
     AND OH.order_date < DATE_FORMAT(NOW(), '%Y-%m-01')
 	AND S.shipment_Method_Type_Id = 'NEXT_DAY'  
 GROUP BY
@@ -261,7 +281,13 @@ LIMIT 1;
 
 
 
+Query cost=6078.70
 
+
+
+
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 8 List of Warehouse Pickers
@@ -279,10 +305,10 @@ LIMIT 1;
 
 
 SELECT
-	p.party_id as employee_id,
-	per.first_name as name,
+    p.party_id as employee_id,
+    per.first_name as name,
     pr.role_type_id,
-	f.FACILITY_ID,
+    f.FACILITY_ID,
     p.STATUS_ID
 FROM
     Party P
@@ -295,11 +321,14 @@ LEFT JOIN
 WHERE
     PR.ROLE_TYPE_ID = 'WAREHOUSE_PICKER'
 AND 
-	f.facility_type_id='WAREHOUSE';
+    f.facility_type_id='WAREHOUSE';
 
 
 
+Query cost=38.61
 
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 9 Total Facilities That Sell the Product
@@ -328,8 +357,13 @@ GROUP BY
     P.PRODUCT_ID;
     
     
+
+
+Query cost=3591411.53
     
-    
+
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 10 Total Items in Various Virtual Facilities
@@ -350,23 +384,23 @@ SELECT
     II.PRODUCT_ID,
     F.FACILITY_ID,
     F.FACILITY_TYPE_ID,
-    SUM(II.QUANTITY_ON_HAND_TOTAL) AS QOH,
-    SUM(II.AVAILABLE_TO_PROMISE_TOTAL) AS ATP
+    II.QUANTITY_ON_HAND_TOTAL AS QOH,
+    II.AVAILABLE_TO_PROMISE_TOTAL AS ATP
 FROM
     Inventory_Item II
 JOIN
     Facility F ON II.FACILITY_ID = F.FACILITY_ID
 WHERE
-    F.FACILITY_TYPE_ID = 'VIRTUAL_FACILITY'  
-GROUP BY
-    F.FACILITY_ID,
-    II.PRODUCT_ID,
-    F.FACILITY_TYPE_ID;
+    F.FACILITY_TYPE_ID = 'VIRTUAL_FACILITY';
 
 
 
 
 
+Query cost=3749.93
+
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
 -- 12 Orders Without Picklist
@@ -381,23 +415,21 @@ GROUP BY
 -- FACILITY_ID
 -- DURATION (How long has the order been assigned at the facility)
    
-   
-SELECT
-    OH.ORDER_ID,
-    OH.ORDER_DATE,
-    SI.STATUS_ID AS ORDER_STATUS,
-    OH.origin_Facility_Id AS FACILITY_ID,
-    TIMESTAMPDIFF(DAY, OH.ORDER_DATE, CURRENT_TIMESTAMP) AS DURATION
-FROM
-    Order_Header OH
-JOIN
-    Status_Item SI ON OH.status_Id = SI.STATUS_ID
-LEFT JOIN
-    Shipment S ON OH.ORDER_ID = S.primary_Order_Id
-LEFT JOIN
-    Facility F ON S.destination_Facility_Id = F.facility_Id 
-LEFT JOIN
-    PickList P ON F.facility_Id = P.facility_Id 
-WHERE P.facility_Id IS NULL; 
 
 
+
+SELECT 
+    oh.order_id AS ORDER_ID,
+    oh.order_date AS ORDER_DATE,
+    oh.status_id AS ORDER_STATUS,
+    oh.origin_facility_id AS FACILITY_ID,
+    DATEDIFF(CURRENT_DATE, oh.order_date) AS DURATION
+FROM Order_Header oh
+LEFT JOIN PickList_Item pi ON oh.order_id = pi.order_id
+WHERE pi.order_id IS NULL;
+
+
+
+Query Cost=111706.06
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________
